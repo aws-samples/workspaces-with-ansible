@@ -1,0 +1,72 @@
+---
+- name: Initial server setup
+  hosts:
+    - amazonlinux_workspaces
+    - ubuntu_workspaces
+  gather_facts: False
+  tasks:
+    - name: Check if SSH key is already present
+      stat:
+        path: "/home/ansible/.ssh/authorized_keys"
+      register: ssh_key_check
+      become: yes
+      ignore_errors: true
+
+    - name: Halt playbook if SSH key is present
+      fail:
+        msg: "SSH key already present, halting playbook."
+      when: ssh_key_check.stat.exists
+
+    - name: Ensure ansible user exists
+      user:
+        name: ansible
+        state: present
+      become: yes
+      vars:
+        ansible_ssh_pass: '{{ ansible_ssh_pass }}'
+
+    - name: Install SSH key for ansible user
+      authorized_key:
+        user: ansible
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+      become: yes
+      vars:
+        ansible_ssh_pass: '{{ ansible_ssh_pass }}'
+
+    - name: Remove existing PasswordAuthentication lines
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PasswordAuthentication'
+        state: absent
+      become: yes
+      vars:
+        ansible_ssh_pass: '{{ ansible_ssh_pass }}'
+
+    - name: Set PasswordAuthentication to no at the end of the file
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        insertafter: 'EOF'
+        line: 'PasswordAuthentication no'
+      become: yes
+      vars:
+        ansible_ssh_pass: '{{ ansible_ssh_pass }}'
+
+    - name: Append block to the end of sshd_config for ansible user
+      blockinfile:
+        path: "/etc/ssh/sshd_config"
+        insertafter: 'EOF'
+        block: |
+          Match User ansible
+          PasswordAuthentication no
+      become: yes
+      vars:
+        ansible_ssh_pass: '{{ ansible_ssh_pass }}'
+
+    - name: Restart sshd to apply changes
+      systemd:
+        name: sshd
+        state: restarted
+      become: yes
+      vars:
+        ansible_ssh_pass: '{{ ansible_ssh_pass }}'

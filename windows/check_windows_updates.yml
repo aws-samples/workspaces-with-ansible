@@ -1,0 +1,17 @@
+---
+- name: Windows Update State Check
+  hosts: "{{ target_hosts }}"
+  gather_facts: no
+
+  tasks:
+    - name: Check Windows Update State
+      ansible.windows.win_updates:
+        state: searched
+      register: update_status
+
+    - name: Display Concise Windows Update Status
+      debug:
+        msg: "Downloaded: {{ item.value.downloaded }}, Installed: {{ item.value.installed }}"
+      loop: "{{ update_status.updates | dict2items }}"
+      loop_control:
+        label: "{{ item.value.title }} (KB{{ item.value.kb | join(', KB') }})"

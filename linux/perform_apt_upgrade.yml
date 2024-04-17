@@ -1,0 +1,16 @@
+---
+- name: Upgrade APT packages and show summary
+  hosts: ubuntu_workspaces
+  become: yes
+
+  tasks:
+    - name: Update APT cache
+      ansible.builtin.apt:
+        update_cache: yes
+      register: update_cache
+
+    - name: Perform a full upgrade
+      ansible.builtin.apt:
+        upgrade: yes
+      register: apt_upgrade
+      when: update_cache is changed

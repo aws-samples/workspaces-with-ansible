@@ -1,0 +1,18 @@
+---
+- name: Install Notepad++
+  hosts: "{{ target_hosts }}"
+  gather_facts: no
+  tasks:
+    - name: Ensure C:\Temp exists
+      win_file:
+        path: C:\Temp
+        state: directory
+        
+    - name: Download Notepad++ Installer
+      win_get_url:
+        url: 'https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.6/npp.8.6.Installer.x64.exe'
+        dest: 'C:\Temp\npp_installer.exe'
+        force: yes
+
+    - name: Install Notepad++
+      win_command: 'C:\Temp\npp_installer.exe /S'

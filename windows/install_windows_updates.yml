@@ -1,0 +1,17 @@
+---
+- name: Install Windows Updates
+  hosts: "{{ target_hosts }}"
+  gather_facts: no
+
+  tasks:
+    - name: Install all available Windows updates
+      ansible.windows.win_updates:
+        state: installed
+        category_names: ['CriticalUpdates', 'SecurityUpdates', 'UpdateRollups']
+        reboot: yes
+        reboot_timeout: 600
+      register: update_result
+
+    - name: Display Update Installation Results
+      debug:
+        msg: "{{ update_result }}"

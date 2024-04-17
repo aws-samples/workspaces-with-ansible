@@ -1,0 +1,20 @@
+---
+- name: Check for APT updates
+  hosts: ubuntu_workspaces
+  become: yes
+
+  tasks:
+    - name: Update APT cache
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Check for available upgrades
+      ansible.builtin.shell:
+        cmd: apt list --upgradable
+      register: apt_list
+
+    - name: Print list of upgradable packages
+      debug:
+        var: apt_list.stdout_lines
+      when: apt_list.stdout_lines is defined and apt_list.stdout_lines | length > 0

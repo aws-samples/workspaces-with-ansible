@@ -1,0 +1,25 @@
+---
+- name: List Installed Applications on Windows Host
+  hosts: "{{ target_hosts }}"
+  gather_facts: no
+
+  tasks:
+    - name: Get list of installed 64-bit applications
+      win_shell: |
+        Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* |
+        Select-Object DisplayName, DisplayVersion, Publisher, InstallDate
+      register: installed_apps_64
+
+    - name: Get list of installed 32-bit applications
+      win_shell: |
+        Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* |
+        Select-Object DisplayName, DisplayVersion, Publisher, InstallDate
+      register: installed_apps_32
+
+    - name: Combine and sort application lists
+      set_fact:
+        combined_apps: "{{ (installed_apps_64.stdout_lines + installed_apps_32.stdout_lines) | unique | sort }}"
+
+    - name: Print combined list of installed applications
+      debug:
+        var: combined_apps
