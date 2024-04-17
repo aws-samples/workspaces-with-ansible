@@ -56,7 +56,6 @@ After creating your Ubuntu 22.04 instance, you can connect to it with either SSH
 While connected to your Ubuntu instance, run the following commands. Be sure to run the `pip3` command as written, not with `sudo` in front of it. 
 
 ```bash
-mkdir ~/ansible
 sudo add-apt-repository --yes ppa:ansible/ansible
 sudo apt update
 sudo apt-get install python3-pip ansible jq realmd krb5-user -y
@@ -139,7 +138,7 @@ ssm-user@ip-10-0-2-235:~$
 
 Compare with the output of the inventory python script directly. Note that the Windows WorkSpaces have their IP addresses set with an override to use their hostname instead. This is because the default behavior for Windows and Kerberos [is to reject connection requests made directly to IP addresses](https://learn.microsoft.com/en-us/windows-server/security/kerberos/configuring-kerberos-over-ip).
 
-```json
+```bash
 ssm-user@ip-10-0-2-235:~$ ~/workspaces-with-ansible/workspaces_inventory_provider.py --list
 {
     "_meta": {
@@ -500,7 +499,7 @@ It can be run with this command:
 ansible-playbook ~/workspaces-with-ansible/check_apt_updates.yml -i ~/workspaces-with-ansible/workspaces_inventory.py
 ```
 
-Here is an example of the output. From the below output we can see that there are some updates which need to be performed. We also see the currently installed version, and the version which could be installed.
+Here is an example of the output. From the below output, you can see that there are some updates which need to be performed. You also see the currently installed version, and the version which could be installed.
 
 ```bash
 ssm-user@ip-10-14-1-59:/var/snap/amazon-ssm-agent/7628$ ansible-playbook ~/workspaces-with-ansible/check_apt_updates.yml -i ~/workspaces-with-ansible/workspaces_inventory.py
